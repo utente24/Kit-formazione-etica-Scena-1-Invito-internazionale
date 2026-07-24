@@ -648,6 +648,26 @@ function renderResult(){
       <div class="copy-flash" id="copyFlash">Copiato negli appunti ✓</div>
     </div>
   `;
+  /* ---- Invio automatico a Google Sheet ---- */
+  const GOOGLE_SHEET_URL = 'INCOLLA_QUI_URL_APPS_SCRIPT'; // <-- sostituisci con l'URL della tua App Web (finisce con /exec)
+  if (GOOGLE_SHEET_URL && GOOGLE_SHEET_URL.indexOf('http') === 0) {
+    fetch(GOOGLE_SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors', // richiesto da Apps Script: la risposta non sarà leggibile, ma l'invio funziona
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        nome: r.name,
+        direzione: r.direzione || '—',
+        scena: r.scene,
+        corrette: r.score,
+        totale: r.total,
+        percentuale: pct,
+        esito: passed ? 'Superato' : 'Da ripassare',
+        data: r.completedAt
+      })
+    }).catch(function(err){ console.warn('Invio al Google Sheet non riuscito:', err); });
+  }
+
   const TRAINER_EMAIL = 'iacolino@adspmaresiciliaorientale.it';
   const mailSubject = `Risultato Kit Formazione Etica – ${SCENE.title} – ${r.name}`;
   const mailBody = `Nome: ${r.name}\nDirezione: ${r.direzione||'—'}\nScena: ${r.scene}\nRisposte corrette: ${r.score}/${r.total}\nPercentuale: ${pct}%\nEsito: ${passed?'Superato':'Da ripassare'}\nData: ${formatDate(r.completedAt)}`;
